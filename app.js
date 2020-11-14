@@ -9,6 +9,42 @@ const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
+const Choice = require("inquirer/lib/objects/choice");
+const Choices = require("inquirer/lib/objects/choices");
+
+function prompter(){
+    return inquirer.prompt([
+        {   type:"checkbox",
+            message:"Select Role",
+            Choices:[
+                "Manager",
+                "Engineer",
+                "Employee",
+                "Intern"
+            ]
+    },
+    {
+        type:"input",
+        message:"Provide the Name: ",
+        name:"name"
+    },
+    {
+        type:"input",
+        message:"Please Provide the e-mail: ",
+        name:"name"
+    },
+    {
+        type:"input",
+        message:"Please Provide the e-mail: ",
+        name:"name"
+    },
+
+
+
+
+
+    ])
+}
 
 
 // Write code to use inquirer to gather information about the development team members,
