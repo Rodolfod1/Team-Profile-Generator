@@ -6,6 +6,10 @@ const path = require("path");
 const util = require("util");
 const fs = require("fs");
 
+// promisify file writing and directory creator 
+const writeFileAsync=util.promisify(fs.writeFile);
+const mkdirAsync=util.promisify(fs.mkdir)
+
 const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 
@@ -13,95 +17,78 @@ const render = require("./lib/htmlRenderer");
 const Choice = require("inquirer/lib/objects/choice");
 const Choices = require("inquirer/lib/objects/choices");
 
-
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
-const employees=[];
-var again=true;
 
-function askQs(){
-    inquirer.prompt([
-        {   type:"checkbox",
-            message:"Select Role",
-            Choices:[
-                "Manager",
-                "Engineer",
-                "Intern"
+const start = async () =>{
+    const employees=[];
+    var again=true;
+    const GenQs=[
+                {   type:"checkbox",
+                            message:"Select Role",
+                            name:"role",
+                            Choices:[
+                                "Manager",
+                                "Engineer",
+                                "Intern"
+                                ]
+                        },
+                { message:"Provide the Name: ",
+                    name:"name",
+                },
+                { message:"Please Provide the e-mail: ",
+                  name:"email",
+                },
+                { message:"Please Provide employee id#: ",
+                  name:"id",
+                },
             ]
-    },
-    {
-        type:"input",
-        message:"Provide the Name: ",
-        name:"name"
-    },
-    {
-        type:"input",
-        message:"Please Provide the e-mail: ",
-        name:"email"
-    },
-    {
-        type:"input",
-        message:"Please Provide employee id#: ",
-        name:"id"
-    },
-    ]).then(answer => {
-        // check for the role and create objects accordingly 
-         if (answer.Choices === "Manager") {
-                inquirer.prompt([
-                    {
-                        type:"input",
-                        message:"Please provide the Office Number: ",
-                        name:"officeNumber"
-                    }
-                ]).then(val =>{
-                    /// creates an object with all variables and push it to employees 
-                    employees.push(new Manager(answer.name,answer.id,answer.email,val.officeNumber));
-                })
+            // specific questions according Roles
+    const MgrQ=[{message:"Please provide the Office Number: ", name:"officeNumber"}];
+    const EngQ=[{message:"Please provide a Github username: ", name:"gitHub"}];
+    const IntQ=[{message:"Please provide the School Name: ", name:"school"}];
+    // Looping the questions with a while 
+    while (again){
+        // creating the object 
+        const {role, name, email, id} = await inquirer.prompt(GenQs);
+        if (role === Manager){
+            const {officeNumber} = await inquirer.prompt(MgrQ);
+            // pushing to the array creating a new member 
+            employees.push(new Manager(name, email, id, officeNumber));
+        } else if (role === Engineer){
+            const {gitHub} = await inquirer.prompt(EngQ);
+            // pushing to the array creating a new member 
+            employees.push(new Engineer(name, email, id, gitHub));
+        } else { 
+            const {school} = await inquirer.prompt(IntQ);
+            // pushing to the array creating a new member 
+            employees.push(new Intern(name, email, id, school));
+        }
 
-            }else if (answer.Choices=== "Engineer" ){
-                inquirer.prompt([
-                    {
-                        type:"input",
-                        message:"Please provide a Github username: ",
-                        name:"gitHub"
-                    }
-                ]).then(val =>{
-                    /// creates an object with all variables and push it to employees 
-                    employees.push(new Engineer(answer.name,answer.id,answer.email,val.gitHub));
-                })
-
-            }else {
-                inquirer.prompt([
-                    {
-                        type:"input",
-                        message:"Please provide the School Name: ",
-                        name:"school"
-                    }
-                ]).then(val =>{
-                    /// creates an object with all variables and push it to employees 
-                    employees.push(new Intern(answer.name,answer.id,answer.email,val.school));
-                })
-
-
-            };
-    })
-}
-
-
-
-
-
-
-
-
+        const askContinue= [{ type:"confirm", message:" Do you want to continue adding employees?  ", name:"confirmation"}]
+        const {valueCont}= await inquirer.prompt(askContinue);
+        again=valueCont;
+        console.log(again);
+    }
+ 
 // After the user has input all employees desired, call the `render` function (required
 // above) and pass in an array containing all employee objects; the `render` function will
 // generate and return a block of HTML including templated divs for each employee!
-const html= render(employees);
+    const html= render(employees);
 
 // After you have your html, you're now ready to create an HTML file using the HTML
 // returned from the `render` function. Now write it to a file named `team.html` in the
 // `output` folder. You can use the variable `outputPath` above target this location.
+if (!fs.existsSync(outputPath)) {
+    const error = await mkdirAsync(OUTPUT_DIR);
+    error && console.error(error);
+  }
+
+  const error = await writeFileAsync(outputPath, html);
+  error && console.error(error);
+};
+
+start();
 
 
 
