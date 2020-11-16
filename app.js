@@ -1,14 +1,16 @@
 const Manager = require("./lib/Manager");
 const Engineer = require("./lib/Engineer");
 const Intern = require("./lib/Intern");
+const Employee = require("./lib/Employee");
 const inquirer = require("inquirer");
 const path = require("path");
 const util = require("util");
 const fs = require("fs");
 
 // promisify file writing and directory creator 
+const mkdirAsync=util.promisify(fs.mkdir);
 const writeFileAsync=util.promisify(fs.writeFile);
-const mkdirAsync=util.promisify(fs.mkdir)
+
 
 const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
@@ -17,57 +19,63 @@ const render = require("./lib/htmlRenderer");
 const Choice = require("inquirer/lib/objects/choice");
 const Choices = require("inquirer/lib/objects/choices");
 
+
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
-
+// declaring my questions for inquirer
+const GenQs = [
+    {   type:"list",
+                message:"Select Role",
+                name:"role",
+                choices:[
+                    "Manager",
+                    "Engineer",
+                    "Intern"
+                    ]
+            },
+    { message:"Provide the Name: ",
+        name:"name",
+    },
+    { message:"Please Provide the e-mail: ",
+      name:"email",
+    },
+    { message:"Please Provide employee id#: ",
+      name:"id",
+    },
+];
+// specific questions according Roles
+const MgrQ=[{message:"Please provide the Office Number: ", name:"officeNumber"}];
+const EngQ=[{message:"Please provide a Github username: ", name:"gitHub"}];
+const IntQ=[{message:"Please provide the School Name: ", name:"school"}];
+// question for asking if there are more employees to add
+const askContinue= [{ type:"confirm", message:" Do you want to continue adding employees?  ", name:"confirmation"}];
+// Calling an Async function ass my main function 
+                       
 const start = async () =>{
     const employees=[];
     var again=true;
-    const GenQs=[
-                {   type:"checkbox",
-                            message:"Select Role",
-                            name:"role",
-                            Choices:[
-                                "Manager",
-                                "Engineer",
-                                "Intern"
-                                ]
-                        },
-                { message:"Provide the Name: ",
-                    name:"name",
-                },
-                { message:"Please Provide the e-mail: ",
-                  name:"email",
-                },
-                { message:"Please Provide employee id#: ",
-                  name:"id",
-                },
-            ]
-            // specific questions according Roles
-    const MgrQ=[{message:"Please provide the Office Number: ", name:"officeNumber"}];
-    const EngQ=[{message:"Please provide a Github username: ", name:"gitHub"}];
-    const IntQ=[{message:"Please provide the School Name: ", name:"school"}];
+ 
     // Looping the questions with a while 
     while (again){
         // creating the object 
+        console.log(again);
         const {role, name, email, id} = await inquirer.prompt(GenQs);
-        if (role === Manager){
+        if (role === 'Manager'){
             const {officeNumber} = await inquirer.prompt(MgrQ);
             // pushing to the array creating a new member 
-            employees.push(new Manager(name, email, id, officeNumber));
-        } else if (role === Engineer){
+            employees.push(new Manager(name, id, email,  officeNumber));
+        } else if (role === 'Engineer'){
             const {gitHub} = await inquirer.prompt(EngQ);
             // pushing to the array creating a new member 
-            employees.push(new Engineer(name, email, id, gitHub));
+            employees.push(new Engineer(name, id, email, gitHub));
         } else { 
             const {school} = await inquirer.prompt(IntQ);
             // pushing to the array creating a new member 
-            employees.push(new Intern(name, email, id, school));
-        }
-
-        const askContinue= [{ type:"confirm", message:" Do you want to continue adding employees?  ", name:"confirmation"}]
-        const {valueCont}= await inquirer.prompt(askContinue);
-        again=valueCont;
+            employees.push(new Intern(name, id, email, school));
+        } 
+        const {a}= await inquirer.prompt(askContinue);
+        console.log(a);
+        again=a;
         console.log(again);
     }
  
@@ -89,10 +97,6 @@ if (!fs.existsSync(outputPath)) {
 };
 
 start();
-
-
-
-
 
 // Hint: you may need to check if the `output` folder exists and create it if it
 // does not.

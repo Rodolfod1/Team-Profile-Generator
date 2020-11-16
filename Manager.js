@@ -1,3 +1,0 @@
-Class Manager {
-    constructor 
-}
