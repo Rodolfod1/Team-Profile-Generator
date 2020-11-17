@@ -49,17 +49,18 @@ const EngQ=[{message:"Please provide a Github username: ", name:"gitHub"}];
 const IntQ=[{message:"Please provide the School Name: ", name:"school"}];
 // question for asking if there are more employees to add
 const askContinue= [{ type:"confirm", message:" Do you want to continue adding employees?  ", name:"confirmation"}];
-// Calling an Async function ass my main function 
-                       
+// Calling an Async function ass my main function                      
 const start = async () =>{
     const employees=[];
-    var again=true;
- 
+    let again=true;
     // Looping the questions with a while 
     while (again){
-        // creating the object 
-        console.log(again);
-        const {role, name, email, id} = await inquirer.prompt(GenQs);
+        // extacting values from the inquirer array using destructuring for general questions 
+        const {role, name, email, id} = await inquirer.prompt(GenQs);       
+        // HINT: each employee type (manager, engineer, or intern) has slightly different
+        // information; write your code to ask different questions via inquirer depending on
+        // employee type.
+        //check if the role is manager 
         if (role === 'Manager'){
             const {officeNumber} = await inquirer.prompt(MgrQ);
             // pushing to the array creating a new member 
@@ -73,10 +74,9 @@ const start = async () =>{
             // pushing to the array creating a new member 
             employees.push(new Intern(name, id, email, school));
         } 
-        const {a}= await inquirer.prompt(askContinue);
-        console.log(a);
-        again=a;
-        console.log(again);
+        // remainder-- use the same name property content from the inquirer for destructuring 
+        const {confirmation}= await inquirer.prompt(askContinue);
+        again=confirmation;       
     }
  
 // After the user has input all employees desired, call the `render` function (required
@@ -87,23 +87,21 @@ const start = async () =>{
 // After you have your html, you're now ready to create an HTML file using the HTML
 // returned from the `render` function. Now write it to a file named `team.html` in the
 // `output` folder. You can use the variable `outputPath` above target this location.
-if (!fs.existsSync(outputPath)) {
-    const error = await mkdirAsync(OUTPUT_DIR);
-    error && console.error(error);
-  }
-
+// Hint: you may need to check if the `output` folder exists and create it if it
+// does not.
+    //checking if my output folder exists
+    if (!fs.existsSync(outputPath)) {
+        const error = await mkdirAsync(OUTPUT_DIR);
+        error && console.error(error);
+    }
   const error = await writeFileAsync(outputPath, html);
   error && console.error(error);
 };
 
 start();
 
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
 
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
+
 
 // HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
 // and Intern classes should all extend from a class named Employee; see the directions
