@@ -1,0 +1,43 @@
+*,*::before,*::after {
+    box-sizing: border-box;
+    padding: 0%;
+    margin: 0%;
+}
+body{
+    background-color:#260F01;
+ 
+}
+.jumbotron {
+    color: #F2AE72;
+    background-color: transparent;
+}
+
+.card{
+margin-left: 20px;
+}
+
+.card-header{
+    background-color: #A67449;
+}
+.card-body{
+    background-color: #BF5841;
+}
+.list-group-item {
+background-color: #F2E0D5;
+}
+
+.soc{
+    color: #F2AE72;
+    margin-right: 10px;
+}
+
+footer {
+    position:sticky;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+     text-align: center;
+     margin-top: 80px;
+     
+    
+  }
